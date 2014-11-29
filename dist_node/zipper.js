@@ -1,9 +1,14 @@
 /*
- * THIS FILE IS AUTO GENERATED from 'lib/zipper.kep'
+ * THIS FILE IS AUTO GENERATED FROM 'lib/zipper.kep'
  * DO NOT EDIT
-*/"use strict";
+*/
+"use strict";
 var __o = require("nu-stream")["stream"],
-    append = __o["append"],
+    __o0 = require("nu-stream")["select"],
+    extract, children, parent, path, lefts, rights, hasChildren, hasParent, isRoot, isChild, isLeaf, isFirst, isLast,
+        up, down, left, right, whilst, recur, seq, any, root, leftmost, rightmost, leftLeaf, rightLeaf, nextUpDfs,
+        nextDfs, prevDfs, replace, modify, remove, setLefts, modifyLefts, setRights, modifyRights, insertLeft,
+        insertRight, insertChild, appendChild, detach, zipper, append = __o["append"],
     cons = __o["cons"],
     first = __o["first"],
     rest = __o["rest"],
@@ -12,22 +17,18 @@ var __o = require("nu-stream")["stream"],
     NIL = __o["NIL"],
     reverse = __o["reverse"],
     stream = __o["stream"],
-    __o0 = require("nu-stream")["select"],
     skip = __o0["skip"],
-    extract, children, parent, path, lefts, rights, hasChildren, hasParent, isRoot, isChild, isLeaf, isFirst, isLast,
-        up, down, left, right, whilst, recur, seq, any, root, leftmost, rightmost, leftLeaf, rightLeaf, nextUpDfs,
-        nextDfs, prevDfs, replace, modify, remove, setLefts, modifyLefts, setRights, modifyRights, insertLeft,
-        insertRight, insertChild, appendChild, detach, zipper, reduceRight = Function.prototype.call.bind(Array.prototype
-            .reduceRight),
-    Context = (function(loc, children, constructNode) {
+    reduceRight = Function.prototype.call.bind(Array.prototype.reduceRight),
+    Context = (function(loc, children, constructNode, edgeReg) {
         var self = this;
         (self.loc = loc);
         (self.children = children);
         (self.constructNode = constructNode);
+        (self.edgeReg = edgeReg);
     });
 (Context.prototype.setLoc = (function(loc) {
     var self = this;
-    return new(Context)(loc, self.children, self.constructNode);
+    return new(Context)(loc, self.children, self.constructNode, self.edgeReg);
 }));
 var Focus = (function(focus, dirty, children) {
     var self = this;
@@ -82,26 +83,36 @@ var setSurround = (function(loc, left, focus, right) {
     return new(Loc)(focus, loc.parent, left, right);
 }),
     getChildren = (function(ctx) {
-        if (ctx.loc.focus.children) return ctx.loc.focus.children;
-        var c = focusList(children(ctx));
+        var key = ctx.loc.focus.focus.key,
+            c;
+        if ((!Object.getOwnPropertyDescriptor(ctx.edgeReg, key))) {
+            (c = children(ctx));
+            Object.defineProperty(ctx.edgeReg, key, ({
+                writable: true,
+                value: c
+            }));
+        }
+        (c = Object.getOwnPropertyDescriptor(ctx.edgeReg, key)
+            .value);
+        (c = focusList(c));
         ctx.loc.focus.setChildren(c);
         return c;
     }),
-    getFocus = (function(x) {
-        var x0 = x.loc;
-        return x0.focus;
+    getFocus = (function(z) {
+        var x = z.loc;
+        return x.focus;
     }),
-    getParent = (function(x) {
-        var x0 = x.loc;
-        return x0.parent;
+    getParent = (function(z) {
+        var x = z.loc;
+        return x.parent;
     }),
-    getLefts = (function(x) {
-        var x0 = x.loc;
-        return x0.left;
+    getLefts = (function(z) {
+        var x = z.loc;
+        return x.left;
     }),
-    getRights = (function(x) {
-        var x0 = x.loc;
-        return x0.right;
+    getRights = (function(z) {
+        var x = z.loc;
+        return x.right;
     }),
     markLocDirty = (function(loc) {
         var parent = loc.parent;
@@ -109,62 +120,63 @@ var setSurround = (function(loc, left, focus, right) {
         return loc;
     }),
     construct = (function(ctx, parent, children) {
-        return new(Focus)(ctx.constructNode(parent, unFocusList(children)), false, children);
+        var c = unFocusList(children);
+        Object.defineProperty(ctx.edgeReg, parent.key, ({
+            value: c
+        }));
+        return new(Focus)(ctx.constructNode(parent, c), false, children);
     }),
     constructParent = (function(ctx) {
         return construct(ctx, getParent(ctx)
             .focus.focus, append(reverse(getLefts(ctx)), cons(getFocus(ctx), NIL), getRights(ctx)));
     });
-(extract = (function(x) {
-    var x0 = getFocus(x);
-    return x0.focus;
+(extract = (function(z) {
+    var x = getFocus(z);
+    return x.focus;
 }));
 (path = (function(ctx) {
     return (ctx ? stream(extract(ctx), (function() {
         return path(up(ctx));
     })) : NIL);
 }));
-(lefts = (function(x) {
-    return unFocusList(getLefts(x));
+(lefts = (function(z) {
+    return unFocusList(getLefts(z));
 }));
-(rights = (function(x) {
-    return unFocusList(getRights(x));
+(rights = (function(z) {
+    return unFocusList(getRights(z));
 }));
-(parent = (function(x) {
+(parent = (function(z) {
     var parent0;
-    return extract(((parent0 = getParent(x)), ((parent0 && parent0.focus.dirty) ? markLocDirty(parent0.setFocus(
-        constructParent(x))) : parent0)));
+    return extract(((parent0 = getParent(z)), ((parent0 && parent0.focus.dirty) ? markLocDirty(parent0.setFocus(
+        constructParent(z))) : parent0)));
 }));
 (children = (function(ctx) {
     return ctx.children(extract(ctx));
 }));
-var x = isEmpty,
-    y = getChildren;
-(isLeaf = (function(x0) {
-    return x(y(x0));
+var y = getChildren;
+(isLeaf = (function(z) {
+    return isEmpty(y(z));
 }));
 var y0 = isLeaf;
-(hasChildren = (function(x0) {
-    var x1 = y0(x0);
-    return (!x1);
+(hasChildren = (function(z) {
+    var x = y0(z);
+    return (!x);
 }));
-(hasParent = (function(x0) {
-    var y1 = getParent(x0);
+(hasParent = (function(z) {
+    var y1 = getParent(z);
     return (null !== y1);
 }));
 var y1 = hasParent;
-(isRoot = (function(x0) {
-    var x1 = y1(x0);
-    return (!x1);
+(isRoot = (function(z) {
+    var x = y1(z);
+    return (!x);
 }));
 (isChild = hasParent);
-var y2 = isEmpty;
-(isFirst = (function(x0) {
-    return y2(getLefts(x0));
+(isFirst = (function(z) {
+    return isEmpty(getLefts(z));
 }));
-var y3 = isEmpty;
-(isLast = (function(x0) {
-    return y3(getRights(x0));
+(isLast = (function(z) {
+    return isEmpty(getRights(z));
 }));
 (up = (function(ctx) {
     var parent0;
@@ -172,7 +184,8 @@ var y3 = isEmpty;
         markLocDirty(parent0.setFocus(constructParent(ctx))) : parent0))));
 }));
 (down = (function(ctx) {
-    var loc, cs = getChildren(ctx);
+    var cs = getChildren(ctx),
+        loc;
     return (isEmpty(cs) ? null : ((loc = new(Loc)(first(cs), ctx.loc, NIL, rest(cs))), ctx.setLoc(loc)));
 }));
 (left = (function(ctx) {
@@ -198,8 +211,8 @@ var and = (function(p, c) {
         return (ctx && ((next = c(ctx)), (next && p(next))));
     });
 });
-(seq = (function() {
-    var ops = arguments;
+(seq = (function(ops) {
+      var ops = arguments;
     return reduceRight(ops, and);
 }));
 var or = (function(p, c) {
@@ -207,8 +220,8 @@ var or = (function(p, c) {
         return (ctx && (c(ctx) || p(ctx)));
     });
 });
-(any = (function() {
-    var ops = arguments;
+(any = (function(ops) {
+      var ops = arguments;
     return reduceRight(ops, or);
 }));
 (root = recur.bind(null, up));
@@ -289,7 +302,7 @@ var or = (function(p, c) {
     return ctx.setLoc(loc);
 }));
 (zipper = (function(children0, constructNode, focus) {
-    return new(Context)(Loc.empty.setFocus(new(Focus)(focus)), children0, constructNode);
+    return new(Context)(Loc.empty.setFocus(new(Focus)(focus)), children0, constructNode, ({}));
 }));
 (exports["extract"] = extract);
 (exports["children"] = children);

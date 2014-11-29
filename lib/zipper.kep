@@ -80,17 +80,19 @@ var flip := \f -> \x y -> f(y, x);
 
 // Context
 ////////////////////////////////////////
-var Context := function \loc children constructNode =self -> {
+var Context := function \loc children constructNode edgeReg =self -> {
     self.loc = loc;
     self.children = children;
     self.constructNode = constructNode;
+    self.edgeReg = edgeReg;
 };
 
 Context.prototype.setLoc = \loc =self->
     new Context(
         loc,
         self.children,
-        self.constructNode);
+        self.constructNode,
+        self.edgeReg);
 
 // Focus
 ////////////////////////////////////////
@@ -172,9 +174,17 @@ var setSurround = \loc left focus right ->
         right);
 
 var getChildren = \ctx -> {
-    if (ctx.loc.focus.children) return ctx.loc.focus.children;
-    
-    var c := focusList <| children ctx;
+    var key := ctx.loc.focus.focus.key; 
+    var c;
+    if(!Object.getOwnPropertyDescriptor(ctx.edgeReg, key)){
+        c = children(ctx);
+        Object.defineProperty(ctx.edgeReg, key, {
+            writable: true,
+            value: c
+          });
+    }
+    c = Object.getOwnPropertyDescriptor(ctx.edgeReg, key).value;
+    c = focusList(c);  
     ctx.loc.focus.setChildren(c);
     return c;
 };
@@ -214,11 +224,14 @@ var markLocDirty := \loc -> {
 var markDirty := \ctx ->
     setLoc(ctx, markLocDirty(ctx.loc));
 
-var construct = \ctx parent children ->
-    new Focus(
-        ctx.constructNode(parent, unFocusList <| children),
+var construct = \ctx parent children -> {
+    var c := unFocusList <| children;
+    Object.defineProperty(ctx.edgeReg, parent.key, { value: c});
+    return new Focus(
+        ctx.constructNode(parent, c),
         false,
         children);
+};
 
 var constructParent = \ctx -> 
     construct(ctx,
@@ -626,6 +639,7 @@ zipper := \children, constructNode, focus ->
     new Context(
         Loc.empty.setFocus(new Focus(focus)),
         children,
-        constructNode);
+        constructNode,
+        {});
 
 }
