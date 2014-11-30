@@ -85,15 +85,11 @@ var setSurround = (function(loc, left, focus, right) {
     getChildren = (function(ctx) {
         var key = ctx.loc.focus.focus.key,
             c;
-        if ((!Object.getOwnPropertyDescriptor(ctx.edgeReg, key))) {
+        if ((!ctx.edgeReg[key])) {
             (c = children(ctx));
-            Object.defineProperty(ctx.edgeReg, key, ({
-                writable: true,
-                value: c
-            }));
+            (ctx.edgeReg[key] = c);
         }
-        (c = Object.getOwnPropertyDescriptor(ctx.edgeReg, key)
-            .value);
+        (c = ctx.edgeReg[key]);
         (c = focusList(c));
         ctx.loc.focus.setChildren(c);
         return c;
@@ -121,9 +117,7 @@ var setSurround = (function(loc, left, focus, right) {
     }),
     construct = (function(ctx, parent, children) {
         var c = unFocusList(children);
-        Object.defineProperty(ctx.edgeReg, parent.key, ({
-            value: c
-        }));
+        (ctx.edgeReg[parent.key] = c);
         return new(Focus)(ctx.constructNode(parent, c), false, children);
     }),
     constructParent = (function(ctx) {
@@ -211,8 +205,8 @@ var and = (function(p, c) {
         return (ctx && ((next = c(ctx)), (next && p(next))));
     });
 });
-(seq = (function(ops) {
-      var ops = arguments;
+(seq = (function() {
+    var ops = arguments;
     return reduceRight(ops, and);
 }));
 var or = (function(p, c) {
@@ -220,8 +214,8 @@ var or = (function(p, c) {
         return (ctx && (c(ctx) || p(ctx)));
     });
 });
-(any = (function(ops) {
-      var ops = arguments;
+(any = (function() {
+    var ops = arguments;
     return reduceRight(ops, or);
 }));
 (root = recur.bind(null, up));

@@ -176,14 +176,11 @@ var setSurround = \loc left focus right ->
 var getChildren = \ctx -> {
     var key := ctx.loc.focus.focus.key; 
     var c;
-    if(!Object.getOwnPropertyDescriptor(ctx.edgeReg, key)){
+    if(!ctx.edgeReg.(key)){
         c = children(ctx);
-        Object.defineProperty(ctx.edgeReg, key, {
-            writable: true,
-            value: c
-          });
+        ctx.edgeReg.(key) = c;
     }
-    c = Object.getOwnPropertyDescriptor(ctx.edgeReg, key).value;
+    c = ctx.edgeReg.(key);
     c = focusList(c);  
     ctx.loc.focus.setChildren(c);
     return c;
@@ -226,7 +223,7 @@ var markDirty := \ctx ->
 
 var construct = \ctx parent children -> {
     var c := unFocusList <| children;
-    Object.defineProperty(ctx.edgeReg, parent.key, { value: c});
+    ctx.edgeReg.(parent.key) = c;
     return new Focus(
         ctx.constructNode(parent, c),
         false,
@@ -429,7 +426,7 @@ seq = let
         \ctx ->
             (ctx && let next = c ctx in (next && p next))
 in
-    \ops(...) ->
+    \-ops(...) ->
         reduceRight(ops, and);
 
 /**
@@ -442,7 +439,7 @@ any = let
         \ctx ->
             (ctx && (c ctx || p ctx))
 in
-    \ops(...) ->
+    \-ops(...) ->
         reduceRight(ops, or);
 
 /**
