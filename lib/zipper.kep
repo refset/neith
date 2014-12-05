@@ -60,6 +60,7 @@ package (
 // Zipper Creation
     zipper)
 with
+    import 'weakmap' WeakMap,
     import 'nu-stream::stream' {
         append
         cons
@@ -174,13 +175,13 @@ var setSurround = \loc left focus right ->
         right);
 
 var getChildren = \ctx -> {
-    var key := ctx.loc.focus.focus.key; 
+    var key := extract(ctx);/*ctx.loc.focus.focus.key;*/
     var c;
-    if(!ctx.edgeReg.(key)){
+    if(!ctx.edgeReg.has(key)){
         c = children(ctx);
-        ctx.edgeReg.(key) = c;
+        ctx.edgeReg.set(key,c); /*) = c;*/
     }
-    c = ctx.edgeReg.(key);
+    c = ctx.edgeReg.get(key);
     c = focusList(c);  
     ctx.loc.focus.setChildren(c);
     return c;
@@ -223,7 +224,7 @@ var markDirty := \ctx ->
 
 var construct = \ctx parent children -> {
     var c := unFocusList <| children;
-    ctx.edgeReg.(parent.key) = c;
+    ctx.edgeReg.set(parent,c);/*.(parent.key) = c;*/
     return new Focus(
         ctx.constructNode(parent, c),
         false,
@@ -637,6 +638,6 @@ zipper := \children, constructNode, focus ->
         Loc.empty.setFocus(new Focus(focus)),
         children,
         constructNode,
-        {});
+        new WeakMap());
 
 }

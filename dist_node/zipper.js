@@ -3,7 +3,8 @@
  * DO NOT EDIT
 */
 "use strict";
-var __o = require("nu-stream")["stream"],
+var WeakMap = require("weakmap"),
+    __o = require("nu-stream")["stream"],
     __o0 = require("nu-stream")["select"],
     extract, children, parent, path, lefts, rights, hasChildren, hasParent, isRoot, isChild, isLeaf, isFirst, isLast,
         up, down, left, right, whilst, recur, seq, any, root, leftmost, rightmost, leftLeaf, rightLeaf, nextUpDfs,
@@ -83,13 +84,13 @@ var setSurround = (function(loc, left, focus, right) {
     return new(Loc)(focus, loc.parent, left, right);
 }),
     getChildren = (function(ctx) {
-        var key = ctx.loc.focus.focus.key,
+        var key = extract(ctx),
             c;
-        if ((!ctx.edgeReg[key])) {
+        if ((!ctx.edgeReg.has(key))) {
             (c = children(ctx));
-            (ctx.edgeReg[key] = c);
+            ctx.edgeReg.set(key, c);
         }
-        (c = ctx.edgeReg[key]);
+        (c = ctx.edgeReg.get(key));
         (c = focusList(c));
         ctx.loc.focus.setChildren(c);
         return c;
@@ -117,7 +118,7 @@ var setSurround = (function(loc, left, focus, right) {
     }),
     construct = (function(ctx, parent, children) {
         var c = unFocusList(children);
-        (ctx.edgeReg[parent.key] = c);
+        ctx.edgeReg.set(parent, c);
         return new(Focus)(ctx.constructNode(parent, c), false, children);
     }),
     constructParent = (function(ctx) {
@@ -296,7 +297,7 @@ var or = (function(p, c) {
     return ctx.setLoc(loc);
 }));
 (zipper = (function(children0, constructNode, focus) {
-    return new(Context)(Loc.empty.setFocus(new(Focus)(focus)), children0, constructNode, ({}));
+    return new(Context)(Loc.empty.setFocus(new(Focus)(focus)), children0, constructNode, new(WeakMap)());
 }));
 (exports["extract"] = extract);
 (exports["children"] = children);
